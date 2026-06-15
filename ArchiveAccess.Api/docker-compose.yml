@@ -1,0 +1,22 @@
+services:
+  archive-access-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: archive-access-api
+    ports:
+      - "5235:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__DefaultConnection: "Data Source=/app/data/archive_access.db"
+      Jwt__Issuer: "ArchiveAccessService"
+      Jwt__Audience: "ArchiveAccessClient"
+      Jwt__Key: "CHANGE_THIS_DEVELOPMENT_KEY_1234567890"
+      ExternalSources__DocumentsApi: "https://api1.example.com/documents"
+      ExternalSources__ApprovalsApi: "https://api2.example.com/approvals"
+      FileStorage__BasePath: "/app/Files"
+    volumes:
+      - ./docker-data:/app/data
+      - ./Files:/app/Files
+    restart: unless-stopped

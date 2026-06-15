@@ -1,0 +1,99 @@
+# Build results
+bin/
+obj/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+_ReSharper*/
+*.DotSettings.user
+
+# Rider
+*.sln.iml
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.assets.json
+
+# Test results
+TestResults/
+coverage/
+coverage.xml
+*.trx
+*.coverage
+*.coveragexml
+
+# Logs
+logs/
+*.log
+
+# Runtime files
+*.pid
+*.tmp
+*.temp
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Docker persistent data
+docker-data/
+data/
+
+# Uploaded / generated files
+Files/*
+!Files/.gitkeep
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Local app settings with secrets
+appsettings.Local.json
+appsettings.Production.json
+
+# Keep common appsettings if needed for launch
+!appsettings.json
+!appsettings.Development.json
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Publish output
+publish/
+out/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig

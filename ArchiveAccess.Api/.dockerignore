@@ -1,0 +1,8 @@
+bin/
+obj/
+.vscode/
+.git/
+*.db
+*.db-shm
+*.db-wal
+docker-data/

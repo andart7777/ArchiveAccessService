@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Служба доступа к данным электронного архива документов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --panel: #ffffff;
+            --line: #dce2ea;
+            --text: #263445;
+            --muted: #6b7280;
+            --blue: #0b63ce;
+            --blue-dark: #064fb0;
+            --green: #159447;
+            --orange: #f08a00;
+            --red: #d93025;
+            --gray: #6b7280;
+            --shadow: 0 8px 22px rgba(20, 34, 56, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* LOGIN */
+
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: linear-gradient(135deg, #eef4ff, #f8fafc);
+        }
+
+        .login-card {
+            width: 420px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+        }
+
+        .login-card h1 {
+            margin: 0 0 8px;
+            color: var(--blue);
+            font-size: 23px;
+            line-height: 1.25;
+        }
+
+        .login-card p {
+            margin: 0 0 22px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .form-row {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #445062;
+            font-size: 13px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 10px 11px;
+            background: #fff;
+            color: var(--text);
+            outline: none;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--blue);
+        }
+
+        .primary-btn {
+            border: 0;
+            border-radius: 7px;
+            padding: 11px 16px;
+            background: var(--blue);
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .primary-btn:hover {
+            background: var(--blue-dark);
+        }
+
+        .secondary-btn {
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 10px 15px;
+            background: #fff;
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .danger-btn {
+            border: 1px solid #f1b7b2;
+            border-radius: 7px;
+            padding: 10px 15px;
+            background: #fff;
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        .warning-btn {
+            border: 1px solid #ffd9a3;
+            border-radius: 7px;
+            padding: 10px 15px;
+            background: #fff;
+            color: var(--orange);
+            font-weight: 700;
+        }
+
+        .error {
+            margin-top: 12px;
+            color: var(--red);
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+
+        .success {
+            margin-top: 12px;
+            color: var(--green);
+            font-size: 13px;
+        }
+
+        .hint {
+            margin-top: 18px;
+            padding: 12px;
+            background: #f8fafc;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        /* APP LAYOUT */
+
+        .app {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            grid-template-rows: 72px 1fr;
+        }
+
+        .topbar {
+            grid-column: 1 / 3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            background: #fff;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .topbar-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: var(--blue);
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .menu-icon {
+            font-size: 28px;
+            color: #344054;
+        }
+
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #445062;
+            font-size: 14px;
+        }
+
+        .topbar-user strong {
+            color: var(--blue);
+        }
+
+        .logout-btn {
+            border: 0;
+            background: transparent;
+            color: var(--blue);
+            font-weight: 700;
+            padding: 6px 0;
+        }
+
+        .sidebar {
+            background: #fff;
+            border-right: 1px solid var(--line);
+            padding: 18px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px;
+            color: #475467;
+            font-size: 15px;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item.active {
+            background: #eaf2ff;
+            border-left-color: var(--blue);
+            color: var(--blue);
+            font-weight: 700;
+        }
+
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .content {
+            padding: 18px 22px 28px;
+            overflow: auto;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(20, 34, 56, 0.03);
+            margin-bottom: 12px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--line);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .card-body {
+            padding: 18px 20px;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1fr;
+            gap: 18px;
+        }
+
+        .filters-bottom {
+            display: grid;
+            grid-template-columns: 260px 260px 1fr 128px 128px;
+            gap: 18px;
+            align-items: end;
+            margin-top: 18px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .stat {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            padding: 18px 36px;
+            border-right: 1px solid var(--line);
+        }
+
+        .stat:last-child {
+            border-right: 0;
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border: 2px solid currentColor;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .stat.blue {
+            color: var(--blue);
+        }
+
+        .stat.orange {
+            color: var(--orange);
+        }
+
+        .stat.green {
+            color: var(--green);
+        }
+
+        .stat-label {
+            color: #445062;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--line);
+            border-right: 1px solid #edf1f5;
+            padding: 12px 12px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th:last-child,
+        td:last-child {
+            border-right: 0;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #344054;
+            font-weight: 700;
+        }
+
+        tr:hover td {
+            background: #fbfdff;
+        }
+
+        .table-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 20px;
+            color: #475467;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 5px;
+            padding: 4px 8px;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+
+        .badge.approved {
+            background: #e5f6ea;
+            color: var(--green);
+            border-color: #b9e4c5;
+        }
+
+        .badge.in_approval {
+            background: #fff3df;
+            color: var(--orange);
+            border-color: #ffd49a;
+        }
+
+        .badge.created {
+            background: #e8f1ff;
+            color: var(--blue);
+            border-color: #c8dcfb;
+        }
+
+        .badge.rejected {
+            background: #fde9e8;
+            color: var(--red);
+            border-color: #f6beb9;
+        }
+
+        .badge.archived {
+            background: #eeeeee;
+            color: #555;
+            border-color: #d5d5d5;
+        }
+
+        .badge.revision {
+            background: #fff8d8;
+            color: #8a6d00;
+            border-color: #f3df85;
+        }
+
+        .action-link {
+            border: 0;
+            background: transparent;
+            color: var(--blue);
+            font-weight: 700;
+            padding: 0;
+        }
+
+        /* MODAL */
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.48);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 100;
+        }
+
+        .modal {
+            width: min(1120px, 100%);
+            max-height: 92vh;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 24px 80px rgba(15, 23, 42, 0.35);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .modal-close {
+            border: 0;
+            background: transparent;
+            font-size: 26px;
+            color: #667085;
+        }
+
+        .modal-body {
+            overflow: auto;
+            padding: 18px 20px;
+            background: #f8fafc;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 330px;
+            gap: 16px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table td {
+            border-bottom: 1px solid var(--line);
+            border-right: 0;
+            padding: 12px 0;
+        }
+
+        .info-table td:first-child {
+            width: 210px;
+            color: #475467;
+        }
+
+        .side-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .side-actions button {
+            width: 100%;
+        }
+
+        .approval-table th,
+        .approval-table td {
+            padding: 11px 12px;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        @media (max-width: 1000px) {
+            .app {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .topbar {
+                grid-column: 1;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                padding: 14px 18px;
+            }
+
+            .sidebar {
+                display: flex;
+                overflow-x: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+                padding: 0;
+            }
+
+            .nav-item {
+                white-space: nowrap;
+                border-left: 0;
+                border-bottom: 4px solid transparent;
+            }
+
+            .nav-item.active {
+                border-bottom-color: var(--blue);
+            }
+
+            .filters,
+            .filters-bottom,
+            .stats,
+            .modal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+        }
+    </style>
+</head>
+
+<body>
+<section id="loginPage" class="login-page">
+    <div class="login-card">
+        <h1>Служба доступа к данным электронного архива документов</h1>
+        <p>Авторизуйтесь для работы с документами, маршрутами согласования и доступными действиями.</p>
+
+        <div class="form-row">
+            <label for="username">Логин</label>
+            <input id="username" value="admin" autocomplete="username">
+        </div>
+
+        <div class="form-row">
+            <label for="password">Пароль</label>
+            <input id="password" value="Admin123!" type="password" autocomplete="current-password">
+        </div>
+
+        <button id="loginButton" class="primary-btn" style="width:100%;">Войти</button>
+
+        <div id="loginError" class="error"></div>
+
+        <div class="hint">
+            <strong>Доступные учетные записи:</strong><br>
+            admin / Admin123!<br>
+            ivanov / Author123!<br>
+            petrov / Approver123!<br>
+            sidorova / Approver123!<br>
+            user / User123!
+        </div>
+    </div>
+</section>
+
+<section id="appPage" class="app hidden">
+    <header class="topbar">
+        <div class="topbar-title">
+            <span class="menu-icon">☰</span>
+            <span>Служба доступа к данным электронного архива документов</span>
+        </div>
+
+        <div class="topbar-user">
+            <span>Пользователь: <strong id="currentUserName">—</strong></span>
+            <button id="logoutButton" class="logout-btn">Выйти</button>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <div class="nav-item"><span class="nav-icon">⌂</span>Главная</div>
+        <div class="nav-item active"><span class="nav-icon">▣</span>Документы</div>
+        <div class="nav-item"><span class="nav-icon">☷</span>Согласование</div>
+        <div class="nav-item"><span class="nav-icon">♙</span>Пользователи</div>
+        <div class="nav-item"><span class="nav-icon">▤</span>Справочники</div>
+        <div class="nav-item"><span class="nav-icon">☰</span>Журнал</div>
+    </aside>
+
+    <main class="content">
+        <section class="card">
+            <div class="card-body">
+                <h2 style="margin:0 0 18px;">Поиск и фильтры</h2>
+
+                <div class="filters">
+                    <div class="form-row">
+                        <label for="query">Поиск по названию или номеру</label>
+                        <input id="query" placeholder="Введите название или номер документа">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="typeFilter">Тип документа</label>
+                        <select id="typeFilter">
+                            <option value="">Все типы</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="statusFilter">Статус</label>
+                        <select id="statusFilter">
+                            <option value="">Все статусы</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filters-bottom">
+                    <div class="form-row">
+                        <label for="dateFrom">Дата с</label>
+                        <input id="dateFrom" type="date">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="dateTo">Дата по</label>
+                        <input id="dateTo" type="date">
+                    </div>
+
+                    <div></div>
+
+                    <button id="searchButton" class="primary-btn">Найти</button>
+                    <button id="resetButton" class="secondary-btn">Сбросить</button>
+                </div>
+
+                <div id="searchError" class="error"></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="stats">
+                <div class="stat blue">
+                    <div class="stat-icon">▣</div>
+                    <div>
+                        <div class="stat-label">Всего документов:</div>
+                        <div id="statTotal" class="stat-value">0</div>
+                    </div>
+                </div>
+
+                <div class="stat orange">
+                    <div class="stat-icon">◷</div>
+                    <div>
+                        <div class="stat-label">На согласовании:</div>
+                        <div id="statApproval" class="stat-value">0</div>
+                    </div>
+                </div>
+
+                <div class="stat green">
+                    <div class="stat-icon">▤</div>
+                    <div>
+                        <div class="stat-label">Архивных:</div>
+                        <div id="statArchived" class="stat-value">0</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header">Список документов</div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width:52px;">№</th>
+                        <th>Наименование документа</th>
+                        <th>Тип</th>
+                        <th>Статус</th>
+                        <th>Дата</th>
+                        <th>Автор</th>
+                        <th style="width:170px;">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody id="documentsBody">
+                    <tr>
+                        <td colspan="7">Документы загружаются.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-footer">
+                <span id="tableInfo">Показано 0 документов</span>
+                <span>Показывать по: 10</span>
+            </div>
+        </section>
+    </main>
+</section>
+
+<section id="modalBackdrop" class="modal-backdrop hidden">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Карточка документа</h2>
+            <button id="modalClose" class="modal-close">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="modal-grid">
+                <div>
+                    <section class="card">
+                        <div class="card-header">Основные сведения</div>
+                        <div class="card-body">
+                            <table class="info-table" id="documentFields"></table>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-header">Маршрут согласования</div>
+                        <div class="card-body">
+                            <table class="approval-table">
+                                <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Этап</th>
+                                    <th>Участник</th>
+                                    <th>Статус</th>
+                                    <th>Дата</th>
+                                </tr>
+                                </thead>
+                                <tbody id="approvalSteps"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <div>
+                    <section class="card">
+                        <div class="card-header">Доступные действия</div>
+                        <div class="card-body">
+                            <div class="side-actions" id="actionButtons"></div>
+
+                            <div class="form-row" style="margin-top:14px;">
+                                <label for="decisionComment">Комментарий</label>
+                                <textarea id="decisionComment" placeholder="Комментарий к решению"></textarea>
+                            </div>
+
+                            <div id="decisionSuccess" class="success"></div>
+                            <div id="decisionError" class="error"></div>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-header">Комментарии согласования</div>
+                        <div class="card-body" id="commentsBlock">
+                            Комментарии отсутствуют.
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const state = {
+        token: localStorage.getItem("archive_access_token") || "",
+        user: null,
+        documents: [],
+        selectedDocumentId: null
+    };
+
+    const api = {
+        async request(url, options = {}) {
+            const headers = {
+                "Content-Type": "application/json",
+                ...(options.headers || {})
+            };
+
+            if (state.token) {
+                headers.Authorization = `Bearer ${state.token}`;
+            }
+
+            const response = await fetch(url, { ...options, headers });
+            const contentType = response.headers.get("content-type") || "";
+            const data = contentType.includes("application/json")
+                ? await response.json()
+                : await response.text();
+
+            if (!response.ok) {
+                const message = typeof data === "object"
+                    ? (data.error || data.details || JSON.stringify(data))
+                    : data;
+                throw new Error(message || `Ошибка HTTP ${response.status}`);
+            }
+
+            return data;
+        }
+    };
+
+    const el = {
+        loginPage: document.getElementById("loginPage"),
+        appPage: document.getElementById("appPage"),
+        username: document.getElementById("username"),
+        password: document.getElementById("password"),
+        loginButton: document.getElementById("loginButton"),
+        logoutButton: document.getElementById("logoutButton"),
+        loginError: document.getElementById("loginError"),
+        currentUserName: document.getElementById("currentUserName"),
+        query: document.getElementById("query"),
+        typeFilter: document.getElementById("typeFilter"),
+        statusFilter: document.getElementById("statusFilter"),
+        dateFrom: document.getElementById("dateFrom"),
+        dateTo: document.getElementById("dateTo"),
+        searchButton: document.getElementById("searchButton"),
+        resetButton: document.getElementById("resetButton"),
+        searchError: document.getElementById("searchError"),
+        documentsBody: document.getElementById("documentsBody"),
+        tableInfo: document.getElementById("tableInfo"),
+        statTotal: document.getElementById("statTotal"),
+        statApproval: document.getElementById("statApproval"),
+        statArchived: document.getElementById("statArchived"),
+        modalBackdrop: document.getElementById("modalBackdrop"),
+        modalClose: document.getElementById("modalClose"),
+        documentFields: document.getElementById("documentFields"),
+        approvalSteps: document.getElementById("approvalSteps"),
+        actionButtons: document.getElementById("actionButtons"),
+        decisionComment: document.getElementById("decisionComment"),
+        decisionSuccess: document.getElementById("decisionSuccess"),
+        decisionError: document.getElementById("decisionError"),
+        commentsBlock: document.getElementById("commentsBlock")
+    };
+
+    el.loginButton.addEventListener("click", login);
+    el.logoutButton.addEventListener("click", logout);
+    el.searchButton.addEventListener("click", loadDocuments);
+    el.resetButton.addEventListener("click", resetFilters);
+    el.modalClose.addEventListener("click", closeModal);
+    el.modalBackdrop.addEventListener("click", event => {
+        if (event.target === el.modalBackdrop) closeModal();
+    });
+
+    el.query.addEventListener("keydown", event => {
+        if (event.key === "Enter") loadDocuments();
+    });
+
+    async function login() {
+        el.loginError.textContent = "";
+
+        try {
+            const response = await api.request("/api/auth/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    username: el.username.value.trim(),
+                    password: el.password.value
+                })
+            });
+
+            state.token = response.token;
+            state.user = response.user;
+            localStorage.setItem("archive_access_token", state.token);
+
+            showApp();
+            await loadDirectories();
+            await loadDocuments();
+        } catch (error) {
+            el.loginError.textContent = error.message;
+        }
+    }
+
+    async function restoreSession() {
+        if (!state.token) return;
+
+        try {
+            state.user = await api.request("/api/auth/me");
+            showApp();
+            await loadDirectories();
+            await loadDocuments();
+        } catch {
+            logout();
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem("archive_access_token");
+        state.token = "";
+        state.user = null;
+        state.documents = [];
+        state.selectedDocumentId = null;
+        el.appPage.classList.add("hidden");
+        el.loginPage.classList.remove("hidden");
+        closeModal();
+    }
+
+    function showApp() {
+        el.loginPage.classList.add("hidden");
+        el.appPage.classList.remove("hidden");
+        el.currentUserName.textContent = state.user
+            ? `${state.user.fullName} (${state.user.roleName})`
+            : "—";
+    }
+
+    async function loadDirectories() {
+        const [types, statuses] = await Promise.all([
+            api.request("/api/directories/document-types"),
+            api.request("/api/directories/document-statuses")
+        ]);
+
+        el.typeFilter.innerHTML = `<option value="">Все типы</option>`;
+        for (const item of types) {
+            el.typeFilter.insertAdjacentHTML(
+                "beforeend",
+                `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`
+            );
+        }
+
+        el.statusFilter.innerHTML = `<option value="">Все статусы</option>`;
+        for (const item of statuses) {
+            el.statusFilter.insertAdjacentHTML(
+                "beforeend",
+                `<option value="${escapeHtml(item.code)}">${escapeHtml(item.name)}</option>`
+            );
+        }
+    }
+
+    async function loadDocuments() {
+        clearMessages();
+
+        const query = el.query.value.trim();
+        const dateFrom = el.dateFrom.value;
+        const dateTo = el.dateTo.value;
+
+        if (query.length === 1) {
+            el.searchError.textContent = "Поисковый запрос должен содержать не менее двух символов.";
+            return;
+        }
+
+        if (dateFrom && dateTo && dateFrom > dateTo) {
+            el.searchError.textContent = "Дата начала периода не может быть позже даты окончания.";
+            return;
+        }
+
+        const params = new URLSearchParams();
+
+        if (query) params.set("query", query);
+        if (el.typeFilter.value) params.set("type", el.typeFilter.value);
+        if (el.statusFilter.value) params.set("status", el.statusFilter.value);
+        if (dateFrom) params.set("dateFrom", dateFrom);
+        if (dateTo) params.set("dateTo", dateTo);
+
+        try {
+            state.documents = await api.request(`/api/documents?${params.toString()}`);
+            renderDocuments(state.documents);
+            renderStats(state.documents);
+        } catch (error) {
+            el.searchError.textContent = error.message;
+        }
+    }
+
+    function resetFilters() {
+        el.query.value = "";
+        el.typeFilter.value = "";
+        el.statusFilter.value = "";
+        el.dateFrom.value = "";
+        el.dateTo.value = "";
+        loadDocuments();
+    }
+
+    function renderStats(documents) {
+        el.statTotal.textContent = documents.length;
+        el.statApproval.textContent = documents.filter(x => x.statusCode === "in_approval").length;
+        el.statArchived.textContent = documents.filter(x => x.statusCode === "archived").length;
+    }
+
+    function renderDocuments(documents) {
+        el.documentsBody.innerHTML = "";
+
+        if (!documents.length) {
+            el.documentsBody.innerHTML = `<tr><td colspan="7">Документы не найдены.</td></tr>`;
+            el.tableInfo.textContent = "Показано 0 документов";
+            return;
+        }
+
+        documents.forEach((item, index) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${escapeHtml(item.title)}</td>
+                <td>${escapeHtml(item.type)}</td>
+                <td><span class="badge ${escapeHtml(item.statusCode)}">${escapeHtml(item.status)}</span></td>
+                <td>${escapeHtml(formatDate(item.createdAt))}</td>
+                <td>${escapeHtml(item.author)}</td>
+                <td>
+                    <button class="action-link" data-open="${item.id}">Открыть</button>
+                    &nbsp;&nbsp;
+                    <button class="action-link" data-card="${item.id}">Карточка</button>
+                </td>
+            `;
+
+            row.querySelector("[data-open]").addEventListener("click", () => openDocumentCard(item.id));
+            row.querySelector("[data-card]").addEventListener("click", () => openDocumentCard(item.id));
+
+            el.documentsBody.appendChild(row);
+        });
+
+        el.tableInfo.textContent = `Показано 1–${documents.length} из ${documents.length}`;
+    }
+
+    async function openDocumentCard(id) {
+        clearMessages();
+        state.selectedDocumentId = id;
+
+        try {
+            const card = await api.request(`/api/documents/${id}`);
+            renderDocumentModal(card);
+            el.modalBackdrop.classList.remove("hidden");
+        } catch (error) {
+            el.searchError.textContent = error.message;
+        }
+    }
+
+    function renderDocumentModal(card) {
+        el.documentFields.innerHTML = `
+            ${infoRow("Номер документа:", card.number)}
+            ${infoRow("Наименование:", card.title)}
+            ${infoRow("Тип:", card.type)}
+            ${infoRow("Дата создания:", formatDate(card.createdAt))}
+            ${infoRow("Автор:", card.author)}
+            ${infoRow("Текущий статус:", `<span class="badge ${escapeHtml(card.statusCode)}">${escapeHtml(card.status)}</span>`, true)}
+            ${infoRow("Источник данных:", card.sourceSystem)}
+            ${infoRow("Файл:", card.fileName || "Файл не указан")}
+        `;
+
+        el.approvalSteps.innerHTML = "";
+
+        if (!card.approvalSteps.length) {
+            el.approvalSteps.innerHTML = `<tr><td colspan="5">Маршрут согласования не задан.</td></tr>`;
+        } else {
+            for (const step of card.approvalSteps) {
+                el.approvalSteps.insertAdjacentHTML("beforeend", `
+                    <tr>
+                        <td>${step.stepOrder}</td>
+                        <td>${escapeHtml(step.department)}</td>
+                        <td>${escapeHtml(step.participant)}</td>
+                        <td><span class="badge ${escapeHtml(step.statusCode)}">${escapeHtml(step.status)}</span></td>
+                        <td>${escapeHtml(step.decisionDate ? formatDateTime(step.decisionDate) : "—")}</td>
+                    </tr>
+                `);
+            }
+        }
+
+        renderActionButtons(card.availableActions);
+        renderComments(card.approvalSteps);
+    }
+
+    function renderActionButtons(actions) {
+        el.actionButtons.innerHTML = "";
+
+        const buttons = [
+            { code: "approve", label: "✓ Согласовать", className: "primary-btn" },
+            { code: "reject", label: "× Отклонить", className: "danger-btn" },
+            { code: "revision", label: "▣ Запросить доработку", className: "warning-btn" }
+        ];
+
+        for (const buttonInfo of buttons) {
+            const button = document.createElement("button");
+            button.className = buttonInfo.className;
+            button.textContent = buttonInfo.label;
+            button.disabled = !actions.includes(buttonInfo.code);
+            button.addEventListener("click", () => makeDecision(buttonInfo.code));
+            el.actionButtons.appendChild(button);
+        }
+    }
+
+    function renderComments(steps) {
+        const comments = steps
+            .filter(step => step.decisionComment)
+            .map(step => `
+                <div style="border-bottom:1px solid var(--line);padding:10px 0;">
+                    <strong>${escapeHtml(step.participant)}</strong>
+                    <div style="color:#6b7280;font-size:13px;margin-top:4px;">
+                        ${escapeHtml(step.decisionDate ? formatDateTime(step.decisionDate) : "")}
+                    </div>
+                    <div style="margin-top:6px;">${escapeHtml(step.decisionComment)}</div>
+                </div>
+            `);
+
+        el.commentsBlock.innerHTML = comments.length
+            ? comments.join("")
+            : "Комментарии отсутствуют.";
+    }
+
+    async function makeDecision(decision) {
+        el.decisionSuccess.textContent = "";
+        el.decisionError.textContent = "";
+
+        try {
+            const result = await api.request(`/api/documents/${state.selectedDocumentId}/decision`, {
+                method: "POST",
+                body: JSON.stringify({
+                    decision,
+                    comment: el.decisionComment.value.trim() || null
+                })
+            });
+
+            el.decisionSuccess.textContent = result.message;
+            el.decisionComment.value = "";
+
+            await openDocumentCard(state.selectedDocumentId);
+            await loadDocuments();
+        } catch (error) {
+            el.decisionError.textContent = error.message;
+        }
+    }
+
+    function closeModal() {
+        el.modalBackdrop.classList.add("hidden");
+        el.decisionComment.value = "";
+        el.decisionSuccess.textContent = "";
+        el.decisionError.textContent = "";
+    }
+
+    function clearMessages() {
+        el.searchError.textContent = "";
+        el.decisionSuccess.textContent = "";
+        el.decisionError.textContent = "";
+    }
+
+    function infoRow(label, value, raw = false) {
+        return `
+            <tr>
+                <td>${escapeHtml(label)}</td>
+                <td>${raw ? value : escapeHtml(value)}</td>
+            </tr>
+        `;
+    }
+
+    function formatDate(value) {
+        if (!value) return "—";
+        const parts = value.substring(0, 10).split("-");
+        if (parts.length !== 3) return value;
+        return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    }
+
+    function formatDateTime(value) {
+        if (!value) return "—";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleString("ru-RU");
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    restoreSession();
+</script>
+</body>
+</html>

@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Служба доступа к данным электронного архива</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        :root {
+            --bg: #f5f6f8;
+            --card: #ffffff;
+            --border: #d8dde6;
+            --text: #1f2933;
+            --muted: #6b7280;
+            --accent: #1f4e79;
+            --danger: #9f1d20;
+            --success: #1f7a3f;
+            --warning: #9a6700;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 18px 28px;
+        }
+
+        header h1 {
+            margin: 0 0 6px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        header p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        main {
+            padding: 24px 28px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+
+        .card h2 {
+            margin: 0 0 14px;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            width: 100%;
+            font: inherit;
+        }
+
+        input,
+        select,
+        textarea {
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 9px 10px;
+            background: #ffffff;
+            color: var(--text);
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            border: 0;
+            border-radius: 7px;
+            padding: 10px 12px;
+            background: var(--accent);
+            color: #ffffff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button.secondary {
+            background: #4b5563;
+        }
+
+        button.success {
+            background: var(--success);
+        }
+
+        button.danger {
+            background: var(--danger);
+        }
+
+        button.warning {
+            background: var(--warning);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .actions button {
+            width: auto;
+            min-width: 110px;
+        }
+
+        .status-line {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .status-line strong {
+            color: var(--text);
+        }
+
+        .error {
+            margin-top: 12px;
+            color: var(--danger);
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+
+        .success-text {
+            margin-top: 12px;
+            color: var(--success);
+            font-size: 13px;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 16px;
+        }
+
+        .filters button {
+            min-width: 130px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--border);
+            padding: 10px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .link-button {
+            background: transparent;
+            color: var(--accent);
+            padding: 0;
+            width: auto;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .badge {
+            display: inline-block;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 3px 8px;
+            font-size: 12px;
+            background: #ffffff;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .field {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            background: #fbfdff;
+        }
+
+        .field span {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .field strong {
+            display: block;
+            font-size: 14px;
+        }
+
+        .approval-list {
+            margin-top: 12px;
+        }
+
+        .approval-step {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #ffffff;
+        }
+
+        .approval-step strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .approval-step p {
+            margin: 3px 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 1000px) {
+            .grid,
+            .filters,
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions button,
+            .filters button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <h1>Служба доступа к данным электронного архива документов</h1>
+    <p>Единый доступ к документам, маршрутам согласования, ролям пользователей и связанным источникам данных.</p>
+</header>
+
+<main>
+    <div class="grid">
+        <section class="card">
+            <h2>Авторизация</h2>
+
+            <div class="form-group">
+                <label for="username">Логин</label>
+                <input id="username" value="admin" autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input id="password" value="Admin123!" type="password" autocomplete="current-password">
+            </div>
+
+            <button id="loginButton">Войти</button>
+
+            <div class="status-line" id="userInfo">Пользователь не авторизован.</div>
+            <div class="error" id="loginError"></div>
+
+            <hr style="border:0;border-top:1px solid var(--border);margin:18px 0;">
+
+            <h2>Тестовые учетные записи</h2>
+            <div class="status-line">
+                <strong>admin</strong> / Admin123!<br>
+                <strong>ivanov</strong> / Author123!<br>
+                <strong>petrov</strong> / Approver123!<br>
+                <strong>sidorova</strong> / Approver123!<br>
+                <strong>user</strong> / User123!
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Поиск и фильтрация документов</h2>
+
+            <div class="filters">
+                <div class="form-group">
+                    <label for="query">Поиск по номеру, названию или автору</label>
+                    <input id="query" placeholder="Введите не менее 2 символов">
+                </div>
+
+                <div class="form-group">
+                    <label for="typeFilter">Тип</label>
+                    <select id="typeFilter">
+                        <option value="">Все типы</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="statusFilter">Статус</label>
+                    <select id="statusFilter">
+                        <option value="">Все статусы</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dateFrom">Дата с</label>
+                    <input id="dateFrom" type="date">
+                </div>
+
+                <div class="form-group">
+                    <label for="dateTo">Дата по</label>
+                    <input id="dateTo" type="date">
+                </div>
+
+                <button id="searchButton">Найти</button>
+            </div>
+
+            <div class="error" id="searchError"></div>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>Номер</th>
+                    <th>Название</th>
+                    <th>Тип</th>
+                    <th>Статус</th>
+                    <th>Автор</th>
+                    <th>Источник</th>
+                    <th>Дата</th>
+                </tr>
+                </thead>
+                <tbody id="documentsBody">
+                <tr>
+                    <td colspan="7">Выполните вход и загрузите документы.</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <section class="card hidden" id="documentCard" style="margin-top: 20px;">
+        <h2>Карточка документа</h2>
+
+        <div class="card-grid" id="documentFields"></div>
+
+        <h2 style="margin-top: 18px;">Маршрут согласования</h2>
+        <div class="approval-list" id="approvalSteps"></div>
+
+        <h2 style="margin-top: 18px;">Действия</h2>
+        <div class="form-group">
+            <label for="decisionComment">Комментарий к решению</label>
+            <textarea id="decisionComment" placeholder="Комментарий согласующего"></textarea>
+        </div>
+
+        <div class="actions" id="actionButtons"></div>
+
+        <div class="success-text" id="decisionSuccess"></div>
+        <div class="error" id="decisionError"></div>
+    </section>
+</main>
+
+<script>
+    const state = {
+        token: localStorage.getItem("archive_access_token") || "",
+        user: null,
+        selectedDocumentId: null
+    };
+
+    const api = {
+        async request(url, options = {}) {
+            const headers = {
+                "Content-Type": "application/json",
+                ...(options.headers || {})
+            };
+
+            if (state.token) {
+                headers.Authorization = `Bearer ${state.token}`;
+            }
+
+            const response = await fetch(url, {
+                ...options,
+                headers
+            });
+
+            const contentType = response.headers.get("content-type") || "";
+            const data = contentType.includes("application/json")
+                ? await response.json()
+                : await response.text();
+
+            if (!response.ok) {
+                const message = typeof data === "object"
+                    ? (data.error || data.details || JSON.stringify(data))
+                    : data;
+
+                throw new Error(message || `Ошибка HTTP ${response.status}`);
+            }
+
+            return data;
+        }
+    };
+
+    const elements = {
+        username: document.getElementById("username"),
+        password: document.getElementById("password"),
+        loginButton: document.getElementById("loginButton"),
+        userInfo: document.getElementById("userInfo"),
+        loginError: document.getElementById("loginError"),
+        query: document.getElementById("query"),
+        typeFilter: document.getElementById("typeFilter"),
+        statusFilter: document.getElementById("statusFilter"),
+        dateFrom: document.getElementById("dateFrom"),
+        dateTo: document.getElementById("dateTo"),
+        searchButton: document.getElementById("searchButton"),
+        searchError: document.getElementById("searchError"),
+        documentsBody: document.getElementById("documentsBody"),
+        documentCard: document.getElementById("documentCard"),
+        documentFields: document.getElementById("documentFields"),
+        approvalSteps: document.getElementById("approvalSteps"),
+        actionButtons: document.getElementById("actionButtons"),
+        decisionComment: document.getElementById("decisionComment"),
+        decisionSuccess: document.getElementById("decisionSuccess"),
+        decisionError: document.getElementById("decisionError")
+    };
+
+    elements.loginButton.addEventListener("click", login);
+    elements.searchButton.addEventListener("click", loadDocuments);
+
+    elements.query.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            loadDocuments();
+        }
+    });
+
+    async function login() {
+        clearMessages();
+
+        try {
+            const response = await api.request("/api/auth/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    username: elements.username.value.trim(),
+                    password: elements.password.value
+                })
+            });
+
+            state.token = response.token;
+            state.user = response.user;
+
+            localStorage.setItem("archive_access_token", state.token);
+
+            renderUser();
+            await loadDirectories();
+            await loadDocuments();
+        } catch (error) {
+            elements.loginError.textContent = error.message;
+        }
+    }
+
+    async function restoreSession() {
+        if (!state.token) {
+            return;
+        }
+
+        try {
+            state.user = await api.request("/api/auth/me");
+            renderUser();
+            await loadDirectories();
+            await loadDocuments();
+        } catch {
+            localStorage.removeItem("archive_access_token");
+            state.token = "";
+            state.user = null;
+            renderUser();
+        }
+    }
+
+    function renderUser() {
+        if (!state.user) {
+            elements.userInfo.textContent = "Пользователь не авторизован.";
+            return;
+        }
+
+        elements.userInfo.innerHTML =
+            `<strong>${escapeHtml(state.user.fullName)}</strong><br>` +
+            `Роль: ${escapeHtml(state.user.roleName)}<br>` +
+            `Подразделение: ${escapeHtml(state.user.department)}`;
+    }
+
+    async function loadDirectories() {
+        const [types, statuses] = await Promise.all([
+            api.request("/api/directories/document-types"),
+            api.request("/api/directories/document-statuses")
+        ]);
+
+        elements.typeFilter.innerHTML = `<option value="">Все типы</option>`;
+        for (const item of types) {
+            const option = document.createElement("option");
+            option.value = item.name;
+            option.textContent = item.name;
+            elements.typeFilter.appendChild(option);
+        }
+
+        elements.statusFilter.innerHTML = `<option value="">Все статусы</option>`;
+        for (const item of statuses) {
+            const option = document.createElement("option");
+            option.value = item.code;
+            option.textContent = item.name;
+            elements.statusFilter.appendChild(option);
+        }
+    }
+
+    async function loadDocuments() {
+        clearMessages();
+
+        if (!state.token) {
+            elements.searchError.textContent = "Для загрузки документов необходимо выполнить вход.";
+            return;
+        }
+
+        const query = elements.query.value.trim();
+        const dateFrom = elements.dateFrom.value;
+        const dateTo = elements.dateTo.value;
+
+        if (query.length === 1) {
+            elements.searchError.textContent = "Поисковый запрос должен содержать не менее двух символов.";
+            return;
+        }
+
+        if (dateFrom && dateTo && dateFrom > dateTo) {
+            elements.searchError.textContent = "Дата начала периода не может быть позже даты окончания.";
+            return;
+        }
+
+        const params = new URLSearchParams();
+
+        if (query) params.set("query", query);
+        if (elements.typeFilter.value) params.set("type", elements.typeFilter.value);
+        if (elements.statusFilter.value) params.set("status", elements.statusFilter.value);
+        if (dateFrom) params.set("dateFrom", dateFrom);
+        if (dateTo) params.set("dateTo", dateTo);
+
+        try {
+            const documents = await api.request(`/api/documents?${params.toString()}`);
+            renderDocuments(documents);
+        } catch (error) {
+            elements.searchError.textContent = error.message;
+        }
+    }
+
+    function renderDocuments(documents) {
+        elements.documentsBody.innerHTML = "";
+
+        if (!documents.length) {
+            elements.documentsBody.innerHTML = `<tr><td colspan="7">Документы не найдены.</td></tr>`;
+            return;
+        }
+
+        for (const documentItem of documents) {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>
+                    <button class="link-button" data-id="${documentItem.id}">
+                        ${escapeHtml(documentItem.number)}
+                    </button>
+                </td>
+                <td>${escapeHtml(documentItem.title)}</td>
+                <td>${escapeHtml(documentItem.type)}</td>
+                <td><span class="badge">${escapeHtml(documentItem.status)}</span></td>
+                <td>${escapeHtml(documentItem.author)}</td>
+                <td>${escapeHtml(documentItem.sourceSystem)}</td>
+                <td>${escapeHtml(documentItem.createdAt)}</td>
+            `;
+
+            row.querySelector("button").addEventListener("click", () => {
+                openDocumentCard(documentItem.id);
+            });
+
+            elements.documentsBody.appendChild(row);
+        }
+    }
+
+    async function openDocumentCard(id) {
+        clearMessages();
+        state.selectedDocumentId = id;
+
+        try {
+            const card = await api.request(`/api/documents/${id}`);
+            renderDocumentCard(card);
+        } catch (error) {
+            elements.searchError.textContent = error.message;
+        }
+    }
+
+    function renderDocumentCard(card) {
+        elements.documentCard.classList.remove("hidden");
+
+        elements.documentFields.innerHTML = `
+            ${field("Номер", card.number)}
+            ${field("Название", card.title)}
+            ${field("Тип", card.type)}
+            ${field("Статус", card.status)}
+            ${field("Автор", card.author)}
+            ${field("Подразделение", card.department)}
+            ${field("Источник данных", card.sourceSystem)}
+            ${field("Дата создания", card.createdAt)}
+            ${field("Файл", card.fileName || "Файл не указан")}
+            ${field("Доступные действия", card.availableActions.join(", ") || "view")}
+        `;
+
+        elements.approvalSteps.innerHTML = "";
+
+        if (!card.approvalSteps.length) {
+            elements.approvalSteps.innerHTML = `<div class="status-line">Маршрут согласования не задан.</div>`;
+        } else {
+            for (const step of card.approvalSteps) {
+                const div = document.createElement("div");
+                div.className = "approval-step";
+                div.innerHTML = `
+                    <strong>Этап ${step.stepOrder}. ${escapeHtml(step.department)}</strong>
+                    <p>Участник: ${escapeHtml(step.participant)}</p>
+                    <p>Статус: ${escapeHtml(step.status)}</p>
+                    <p>Комментарий: ${escapeHtml(step.decisionComment || "—")}</p>
+                    <p>Дата решения: ${escapeHtml(step.decisionDate || "—")}</p>
+                `;
+                elements.approvalSteps.appendChild(div);
+            }
+        }
+
+        renderActions(card.availableActions);
+        window.scrollTo({ top: elements.documentCard.offsetTop - 10, behavior: "smooth" });
+    }
+
+    function renderActions(actions) {
+        elements.actionButtons.innerHTML = "";
+
+        const actionMap = [
+            { code: "approve", label: "Согласовать", css: "success" },
+            { code: "reject", label: "Отклонить", css: "danger" },
+            { code: "revision", label: "На доработку", css: "warning" }
+        ];
+
+        for (const action of actionMap) {
+            const button = document.createElement("button");
+            button.textContent = action.label;
+            button.className = action.css;
+            button.disabled = !actions.includes(action.code);
+
+            button.addEventListener("click", () => makeDecision(action.code));
+
+            elements.actionButtons.appendChild(button);
+        }
+
+        const reloadButton = document.createElement("button");
+        reloadButton.textContent = "Обновить карточку";
+        reloadButton.className = "secondary";
+        reloadButton.addEventListener("click", () => openDocumentCard(state.selectedDocumentId));
+        elements.actionButtons.appendChild(reloadButton);
+    }
+
+    async function makeDecision(decision) {
+        clearMessages();
+
+        if (!state.selectedDocumentId) {
+            elements.decisionError.textContent = "Документ не выбран.";
+            return;
+        }
+
+        try {
+            const result = await api.request(`/api/documents/${state.selectedDocumentId}/decision`, {
+                method: "POST",
+                body: JSON.stringify({
+                    decision,
+                    comment: elements.decisionComment.value.trim() || null
+                })
+            });
+
+            elements.decisionSuccess.textContent = result.message;
+            elements.decisionComment.value = "";
+
+            await openDocumentCard(state.selectedDocumentId);
+            await loadDocuments();
+        } catch (error) {
+            elements.decisionError.textContent = error.message;
+        }
+    }
+
+    function field(label, value) {
+        return `
+            <div class="field">
+                <span>${escapeHtml(label)}</span>
+                <strong>${escapeHtml(String(value ?? ""))}</strong>
+            </div>
+        `;
+    }
+
+    function clearMessages() {
+        elements.loginError.textContent = "";
+        elements.searchError.textContent = "";
+        elements.decisionError.textContent = "";
+        elements.decisionSuccess.textContent = "";
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    restoreSession();
+</script>
+</body>
+</html>
